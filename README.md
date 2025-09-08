@@ -189,7 +189,7 @@ tts = AliyunTTSProvider(access_key_id=..., access_key_secret=...)
 
 ## 📌 许可证
 
-未声明 License，默认保留所有权利。若需开源再行补充。
+MIT
 
 ---
 欢迎提出改进建议或直接提交 PR。
