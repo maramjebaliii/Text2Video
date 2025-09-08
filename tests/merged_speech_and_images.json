@@ -1,0 +1,97 @@
+[
+  {
+    "title": {
+      "text": "云计算简介",
+      "audio_path": "C:\\Users\\ke\\Documents\\projects\\python_projects\\test_projects\\aliyun_acp_learning\\tests\\output\\speech\\guiji_云计算简介_b8138cf51b.mp3",
+      "duration": 1.75
+    },
+    "image": "C:\\Users\\ke\\Documents\\projects\\python_projects\\test_projects\\aliyun_acp_learning\\tests\\output\\images\\ivv61szlf1.png",
+    "content": [
+      {
+        "text": "云计算是一种通过互联网按需提供计算资源如服务器、存储、数据库、网络和软件的方法",
+        "audio_path": "C:\\Users\\ke\\Documents\\projects\\python_projects\\test_projects\\aliyun_acp_learning\\tests\\output\\speech\\guiji_云计算是一种通过_cc44d92e65.mp3",
+        "duration": 7.889
+      },
+      {
+        "text": "它使企业可以更灵活地扩展资源并降低基础设施成本",
+        "audio_path": "C:\\Users\\ke\\Documents\\projects\\python_projects\\test_projects\\aliyun_acp_learning\\tests\\output\\speech\\guiji_它使企业可以更灵_3af3a492e9.mp3",
+        "duration": 4.519
+      }
+    ]
+  },
+  {
+    "title": {
+      "text": "什么是云计算？",
+      "audio_path": "C:\\Users\\ke\\Documents\\projects\\python_projects\\test_projects\\aliyun_acp_learning\\tests\\output\\speech\\guiji_什么是云计算_b3687fba5f.mp3",
+      "duration": 1.593
+    },
+    "image": "C:\\Users\\ke\\Documents\\projects\\python_projects\\test_projects\\aliyun_acp_learning\\tests\\output\\images\\04tepuud7v.png",
+    "content": [
+      {
+        "text": "云计算将传统本地部署的计算资源迁移到远程数据中心由云服务提供商管理和维护",
+        "audio_path": "C:\\Users\\ke\\Documents\\projects\\python_projects\\test_projects\\aliyun_acp_learning\\tests\\output\\speech\\guiji_云计算将传统本地_889d0618f3.mp3",
+        "duration": 7.471
+      },
+      {
+        "text": "用户可以根据需要申请或释放资源而无需关心底层硬件的运维",
+        "audio_path": "C:\\Users\\ke\\Documents\\projects\\python_projects\\test_projects\\aliyun_acp_learning\\tests\\output\\speech\\guiji_用户可以根据需要_914a111f8c.mp3",
+        "duration": 6.113
+      }
+    ]
+  },
+  {
+    "title": {
+      "text": "云计算的主要类型",
+      "audio_path": "C:\\Users\\ke\\Documents\\projects\\python_projects\\test_projects\\aliyun_acp_learning\\tests\\output\\speech\\guiji_云计算的主要类型_35ea7265e1.mp3",
+      "duration": 2.064
+    },
+    "image": "C:\\Users\\ke\\Documents\\projects\\python_projects\\test_projects\\aliyun_acp_learning\\tests\\output\\images\\t2ehcpigg4.png",
+    "content": [
+      {
+        "text": "公有云由第三方云服务提供商向多个租户提供服务",
+        "audio_path": "C:\\Users\\ke\\Documents\\projects\\python_projects\\test_projects\\aliyun_acp_learning\\tests\\output\\speech\\guiji_公有云由第三方云_afb65947a6.mp3",
+        "duration": 5.329
+      },
+      {
+        "text": "私有云为单个组织专属使用通常部署在防火墙后面",
+        "audio_path": "C:\\Users\\ke\\Documents\\projects\\python_projects\\test_projects\\aliyun_acp_learning\\tests\\output\\speech\\guiji_私有云为单个组织_1e9176a08b.mp3",
+        "duration": 4.885
+      },
+      {
+        "text": "混合云结合公有云与私有云的优势支持在不同环境之间迁移工作负载",
+        "audio_path": "C:\\Users\\ke\\Documents\\projects\\python_projects\\test_projects\\aliyun_acp_learning\\tests\\output\\speech\\guiji_混合云结合公有云_d075ca5dfb.mp3",
+        "duration": 6.504
+      }
+    ]
+  },
+  {
+    "title": {
+      "text": "云计算的优点",
+      "audio_path": "C:\\Users\\ke\\Documents\\projects\\python_projects\\test_projects\\aliyun_acp_learning\\tests\\output\\speech\\guiji_云计算的优点_f8194139c1.mp3",
+      "duration": 1.384
+    },
+    "image": "C:\\Users\\ke\\Documents\\projects\\python_projects\\test_projects\\aliyun_acp_learning\\tests\\output\\images\\p3cqoqjg5g.png",
+    "content": [
+      {
+        "text": "弹性伸缩根据负载动态调整资源避免资源浪费",
+        "audio_path": "C:\\Users\\ke\\Documents\\projects\\python_projects\\test_projects\\aliyun_acp_learning\\tests\\output\\speech\\guiji_弹性伸缩根据负载_f78638aa82.mp3",
+        "duration": 5.146
+      },
+      {
+        "text": "成本优化按需付费减少初始投资和运维成本",
+        "audio_path": "C:\\Users\\ke\\Documents\\projects\\python_projects\\test_projects\\aliyun_acp_learning\\tests\\output\\speech\\guiji_成本优化按需付费_004df64242.mp3",
+        "duration": 4.833
+      },
+      {
+        "text": "高可用性多可用区和灾备方案提升业务连续性",
+        "audio_path": "C:\\Users\\ke\\Documents\\projects\\python_projects\\test_projects\\aliyun_acp_learning\\tests\\output\\speech\\guiji_高可用性多可用区_48559d2222.mp3",
+        "duration": 4.441
+      },
+      {
+        "text": "了解这些基本概念后你就可以开始评估云服务提供商并设计适合自己业务的云架构了",
+        "audio_path": "C:\\Users\\ke\\Documents\\projects\\python_projects\\test_projects\\aliyun_acp_learning\\tests\\output\\speech\\guiji_了解这些基本概念_28321f9e9c.mp3",
+        "duration": 6.949
+      }
+    ]
+  }
+]

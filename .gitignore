@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environment
+.venv/
+.env
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Output directories
+output/
+output_images/
+audio_output/
+
+# Logs
+*.log
