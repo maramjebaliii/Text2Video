@@ -18,3 +18,4 @@ audio_output/
 
 # Logs
 *.log
+uv.lock
