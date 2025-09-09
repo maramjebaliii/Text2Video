@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 import traceback
-import time
 from typing import Optional
 import streamlit as st
 from dotenv import load_dotenv
@@ -49,11 +48,9 @@ with tab_md:
     # 左右两栏：左侧输入与说明，右侧操作与结果
     left, right = st.columns([3, 2], gap="large")
 
-    # 简单节流窗口（秒），可通过环境变量 UI_THROTTLE_SECONDS 覆盖
-    try:
-        THROTTLE_SECONDS = float(os.getenv("UI_THROTTLE_SECONDS", "3"))
-    except Exception:
-        THROTTLE_SECONDS = 3.0
+    # 全局运行锁：任一任务执行中则禁用所有提交按钮
+    if 'global_running' not in st.session_state:
+        st.session_state['global_running'] = False
 
     # 默认示例
     sample_md = (
@@ -92,11 +89,8 @@ with tab_md:
             uploaded_md = st.file_uploader("上传 Markdown 文件", type=["md", "markdown", "txt"], accept_multiple_files=False)
 
         # 使用表单，避免每次输入都触发重跑
-        # 计算冷却剩余时间，用于禁用提交按钮
-        now_ts = time.time()
-        md_last_ts = st.session_state.get("md_last_submit_ts", 0.0)
-        md_cooldown = max(0.0, THROTTLE_SECONDS - (now_ts - md_last_ts))
-        md_disabled = st.session_state.get("md_running", False) or (md_cooldown > 0)
+        # 按钮在全局运行或本页运行时禁用
+        md_disabled = st.session_state.get("global_running", False)
 
         with st.form("md_form", clear_on_submit=False, border=True):
             if input_mode == "编辑器":
@@ -114,7 +108,7 @@ with tab_md:
             submit_md = st.form_submit_button(
                 "生成视频 (Markdown)",
                 disabled=md_disabled,
-                help=("正在生成，请稍候…" if st.session_state.get("md_running", False) else (f"冷却中，还需 {md_cooldown:.1f}s" if md_cooldown > 0 else None)),
+                help=("已有任务在执行，请稍候…" if md_disabled else None),
             )
 
         # 表单外：工具条（统计 + 下载）
@@ -160,15 +154,11 @@ with tab_md:
             if not md_text.strip():
                 st.warning("请输入 Markdown 内容。")
             else:
-                # 二次校验：运行中或冷却期内忽略本次提交
-                now_ts = time.time()
-                last_ts = st.session_state.get('md_last_submit_ts', 0.0)
-                if st.session_state.get('md_running', False) or (now_ts - last_ts) < THROTTLE_SECONDS:
-                    remain = max(0.0, THROTTLE_SECONDS - (now_ts - last_ts))
-                    st.info(f"操作太频繁，请 {remain:.1f}s 后再试。")
+                # 全局锁二次校验：若已有任务在执行则忽略
+                if st.session_state.get('global_running', False) and not st.session_state.get('md_running', False):
+                    st.info("当前有其它生成任务在执行，请稍后再试。")
                 else:
-                    # 接受本次提交，并记录时间戳
-                    st.session_state['md_last_submit_ts'] = now_ts
+                    st.session_state['global_running'] = True
                     st.session_state['md_running'] = True
                     st.session_state['md_output'] = None
                     st.session_state['md_error'] = None
@@ -200,7 +190,8 @@ with tab_md:
                         st.error(f"生成失败: {e}")
                     finally:
                         st.session_state['md_running'] = False
-                    # 重置提交状态，避免重复运行
+                        st.session_state['global_running'] = False
+                # 重置提交状态，避免重复运行
                 st.session_state['submit_md'] = False
         else:
             # 静态展示上次结果概要
@@ -224,11 +215,7 @@ with tab_topic:
 
     # 使用表单统一提交（左侧）
     with left_t:
-        # 计算 Topic 页冷却剩余时间
-        now_ts_t = time.time()
-        topic_last_ts = st.session_state.get("topic_last_submit_ts", 0.0)
-        topic_cooldown = max(0.0, THROTTLE_SECONDS - (now_ts_t - topic_last_ts))
-        topic_disabled = st.session_state.get("topic_running", False) or (topic_cooldown > 0)
+        topic_disabled = st.session_state.get("global_running", False)
 
         with st.form("topic_form", clear_on_submit=False, border=True):
             topic = st.text_input("主题", value="边缘计算与云计算的协同")
@@ -241,7 +228,7 @@ with tab_topic:
             submit_topic = st.form_submit_button(
                 "生成视频 (Topic)",
                 disabled=topic_disabled,
-                help=("正在生成，请稍候…" if st.session_state.get("topic_running", False) else (f"冷却中，还需 {topic_cooldown:.1f}s" if topic_cooldown > 0 else None)),
+                help=("已有任务在执行，请稍候…" if topic_disabled else None),
             )
 
     if 'topic_running' not in st.session_state:
@@ -265,14 +252,11 @@ with tab_topic:
         if not topic.strip():
             st.warning("请输入主题。")
         else:
-            # 二次校验：运行中或冷却期内忽略
-            now_ts_t = time.time()
-            last_ts_t = st.session_state.get('topic_last_submit_ts', 0.0)
-            if st.session_state.get('topic_running', False) or (now_ts_t - last_ts_t) < THROTTLE_SECONDS:
-                remain_t = max(0.0, THROTTLE_SECONDS - (now_ts_t - last_ts_t))
-                st.info(f"操作太频繁，请 {remain_t:.1f}s 后再试。")
+            # 全局锁二次校验：若已有任务在执行则忽略
+            if st.session_state.get('global_running', False) and not st.session_state.get('topic_running', False):
+                st.info("当前有其它生成任务在执行，请稍后再试。")
             else:
-                st.session_state['topic_last_submit_ts'] = now_ts_t
+                st.session_state['global_running'] = True
                 st.session_state['topic_running'] = True
                 st.session_state['topic_output'] = None
                 st.session_state['topic_error'] = None
@@ -305,6 +289,7 @@ with tab_topic:
                     st.error(f"生成失败: {e}")
                 finally:
                     st.session_state['topic_running'] = False
+                    st.session_state['global_running'] = False
     else:
         if st.session_state['topic_output']:
             with topic_preview:
