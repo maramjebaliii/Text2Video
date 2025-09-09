@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import traceback
+import time
 from typing import Optional
 import streamlit as st
 from dotenv import load_dotenv
@@ -48,6 +49,12 @@ with tab_md:
     # 左右两栏：左侧输入与说明，右侧操作与结果
     left, right = st.columns([3, 2], gap="large")
 
+    # 简单节流窗口（秒），可通过环境变量 UI_THROTTLE_SECONDS 覆盖
+    try:
+        THROTTLE_SECONDS = float(os.getenv("UI_THROTTLE_SECONDS", "3"))
+    except Exception:
+        THROTTLE_SECONDS = 3.0
+
     # 默认示例
     sample_md = (
         """
@@ -85,6 +92,12 @@ with tab_md:
             uploaded_md = st.file_uploader("上传 Markdown 文件", type=["md", "markdown", "txt"], accept_multiple_files=False)
 
         # 使用表单，避免每次输入都触发重跑
+        # 计算冷却剩余时间，用于禁用提交按钮
+        now_ts = time.time()
+        md_last_ts = st.session_state.get("md_last_submit_ts", 0.0)
+        md_cooldown = max(0.0, THROTTLE_SECONDS - (now_ts - md_last_ts))
+        md_disabled = st.session_state.get("md_running", False) or (md_cooldown > 0)
+
         with st.form("md_form", clear_on_submit=False, border=True):
             if input_mode == "编辑器":
                 md_text = st.text_area("Markdown 内容", value=sample_md, height=260, placeholder="# 在此粘贴或书写 Markdown…")
@@ -98,7 +111,11 @@ with tab_md:
                 md_text = st.text_area("文件内容预览 (可编辑)", value=file_text or sample_md, height=260)
 
             # 仅在表单内保留提交按钮
-            submit_md = st.form_submit_button("生成视频 (Markdown)")
+            submit_md = st.form_submit_button(
+                "生成视频 (Markdown)",
+                disabled=md_disabled,
+                help=("正在生成，请稍候…" if st.session_state.get("md_running", False) else (f"冷却中，还需 {md_cooldown:.1f}s" if md_cooldown > 0 else None)),
+            )
 
         # 表单外：工具条（统计 + 下载）
         tc1, tc2 = st.columns([1, 1])
@@ -143,39 +160,48 @@ with tab_md:
             if not md_text.strip():
                 st.warning("请输入 Markdown 内容。")
             else:
-                st.session_state['md_running'] = True
-                st.session_state['md_output'] = None
-                st.session_state['md_error'] = None
-                try:
-                    with md_progress:
-                        with st.status("初始化 Provider...", expanded=False):
-                            llm, tts, image = create_providers()
-                            st.write("LLM / TTS / Image 已就绪")
+                # 二次校验：运行中或冷却期内忽略本次提交
+                now_ts = time.time()
+                last_ts = st.session_state.get('md_last_submit_ts', 0.0)
+                if st.session_state.get('md_running', False) or (now_ts - last_ts) < THROTTLE_SECONDS:
+                    remain = max(0.0, THROTTLE_SECONDS - (now_ts - last_ts))
+                    st.info(f"操作太频繁，请 {remain:.1f}s 后再试。")
+                else:
+                    # 接受本次提交，并记录时间戳
+                    st.session_state['md_last_submit_ts'] = now_ts
+                    st.session_state['md_running'] = True
+                    st.session_state['md_output'] = None
+                    st.session_state['md_error'] = None
+                    try:
+                        with md_progress:
+                            with st.status("初始化 Provider...", expanded=False):
+                                llm, tts, image = create_providers()
+                                st.write("LLM / TTS / Image 已就绪")
 
-                        with st.status("构建 blocks...", expanded=False):
-                            blocks = build_blocks_from_markdown(md_text, llm=llm, tts=tts, image=image)
-                            st.session_state['md_blocks_count'] = len(blocks)
-                            st.write(f"blocks 数量: {len(blocks)}")
+                            with st.status("构建 blocks...", expanded=False):
+                                blocks = build_blocks_from_markdown(md_text, llm=llm, tts=tts, image=image)
+                                st.session_state['md_blocks_count'] = len(blocks)
+                                st.write(f"blocks 数量: {len(blocks)}")
 
-                        with st.status("拼接视频...", expanded=False):
-                            out = assemble_video_from_blocks(blocks, output_path=None)
+                            with st.status("拼接视频...", expanded=False):
+                                out = assemble_video_from_blocks(blocks, output_path=None)
 
-                    st.session_state['md_output'] = str(out)
-                    with md_preview:
-                        st.success("视频已生成")
-                        try:
-                            st.video(str(out))
-                            with open(out, "rb") as vf:
-                                st.download_button("下载视频", data=vf.read(), file_name=os.path.basename(str(out)), mime="video/mp4")
-                        except Exception:
-                            st.info("无法内嵌预览，可手动在文件管理器中打开输出文件。")
-                except Exception as e:
-                    st.session_state['md_error'] = str(e)
-                    st.error(f"生成失败: {e}")
-                finally:
-                    st.session_state['md_running'] = False
+                        st.session_state['md_output'] = str(out)
+                        with md_preview:
+                            st.success("视频已生成")
+                            try:
+                                st.video(str(out))
+                                with open(out, "rb") as vf:
+                                    st.download_button("下载视频", data=vf.read(), file_name=os.path.basename(str(out)), mime="video/mp4")
+                            except Exception:
+                                st.info("无法内嵌预览，可手动在文件管理器中打开输出文件。")
+                    except Exception as e:
+                        st.session_state['md_error'] = str(e)
+                        st.error(f"生成失败: {e}")
+                    finally:
+                        st.session_state['md_running'] = False
                     # 重置提交状态，避免重复运行
-                    st.session_state['submit_md'] = False
+                st.session_state['submit_md'] = False
         else:
             # 静态展示上次结果概要
             if st.session_state['md_output']:
@@ -198,6 +224,12 @@ with tab_topic:
 
     # 使用表单统一提交（左侧）
     with left_t:
+        # 计算 Topic 页冷却剩余时间
+        now_ts_t = time.time()
+        topic_last_ts = st.session_state.get("topic_last_submit_ts", 0.0)
+        topic_cooldown = max(0.0, THROTTLE_SECONDS - (now_ts_t - topic_last_ts))
+        topic_disabled = st.session_state.get("topic_running", False) or (topic_cooldown > 0)
+
         with st.form("topic_form", clear_on_submit=False, border=True):
             topic = st.text_input("主题", value="边缘计算与云计算的协同")
             col1, col2 = st.columns(2)
@@ -206,7 +238,11 @@ with tab_topic:
             with col2:
                 max_sections = st.slider("最大段落数", min_value=1, max_value=12, value=5)
             show_md = st.checkbox("生成后显示 Markdown")
-            submit_topic = st.form_submit_button("生成视频 (Topic)")
+            submit_topic = st.form_submit_button(
+                "生成视频 (Topic)",
+                disabled=topic_disabled,
+                help=("正在生成，请稍候…" if st.session_state.get("topic_running", False) else (f"冷却中，还需 {topic_cooldown:.1f}s" if topic_cooldown > 0 else None)),
+            )
 
     if 'topic_running' not in st.session_state:
         st.session_state['topic_running'] = False
@@ -229,38 +265,46 @@ with tab_topic:
         if not topic.strip():
             st.warning("请输入主题。")
         else:
-            st.session_state['topic_running'] = True
-            st.session_state['topic_output'] = None
-            st.session_state['topic_error'] = None
-            try:
-                with topic_progress:
-                    with st.status("初始化 Provider...", expanded=False):
-                        llm, tts, image = create_providers()
-                        st.write("LLM / TTS / Image 已就绪")
-                    with st.status("生成 Markdown 脚本...", expanded=False):
-                        md = generate_markdown_script(llm=llm, topic=topic, language=language, max_sections=int(max_sections))
-                        if show_md:
-                            st.code(md, language="markdown")
-                    with st.status("构建 blocks...", expanded=False):
-                        blocks = build_blocks_from_markdown(md, llm=llm, tts=tts, image=image)
-                        st.session_state['topic_blocks_count'] = len(blocks)
-                        st.write(f"blocks 数量: {len(blocks)}")
-                    with st.status("拼接视频...", expanded=False):
-                        out = assemble_video_from_blocks(blocks, output_path=None)
-                st.session_state['topic_output'] = str(out)
-                with topic_preview:
-                    st.success("视频已生成")
-                    try:
-                        st.video(str(out))
-                        with open(out, "rb") as vf:
-                            st.download_button("下载视频", data=vf.read(), file_name=os.path.basename(str(out)), mime="video/mp4", key="dl_topic")
-                    except Exception:
-                        st.info("无法内嵌预览，可手动在文件管理器中打开输出文件。")
-            except Exception as e:
-                st.session_state['topic_error'] = str(e)
-                st.error(f"生成失败: {e}")
-            finally:
-                st.session_state['topic_running'] = False
+            # 二次校验：运行中或冷却期内忽略
+            now_ts_t = time.time()
+            last_ts_t = st.session_state.get('topic_last_submit_ts', 0.0)
+            if st.session_state.get('topic_running', False) or (now_ts_t - last_ts_t) < THROTTLE_SECONDS:
+                remain_t = max(0.0, THROTTLE_SECONDS - (now_ts_t - last_ts_t))
+                st.info(f"操作太频繁，请 {remain_t:.1f}s 后再试。")
+            else:
+                st.session_state['topic_last_submit_ts'] = now_ts_t
+                st.session_state['topic_running'] = True
+                st.session_state['topic_output'] = None
+                st.session_state['topic_error'] = None
+                try:
+                    with topic_progress:
+                        with st.status("初始化 Provider...", expanded=False):
+                            llm, tts, image = create_providers()
+                            st.write("LLM / TTS / Image 已就绪")
+                        with st.status("生成 Markdown 脚本...", expanded=False):
+                            md = generate_markdown_script(llm=llm, topic=topic, language=language, max_sections=int(max_sections))
+                            if show_md:
+                                st.code(md, language="markdown")
+                        with st.status("构建 blocks...", expanded=False):
+                            blocks = build_blocks_from_markdown(md, llm=llm, tts=tts, image=image)
+                            st.session_state['topic_blocks_count'] = len(blocks)
+                            st.write(f"blocks 数量: {len(blocks)}")
+                        with st.status("拼接视频...", expanded=False):
+                            out = assemble_video_from_blocks(blocks, output_path=None)
+                    st.session_state['topic_output'] = str(out)
+                    with topic_preview:
+                        st.success("视频已生成")
+                        try:
+                            st.video(str(out))
+                            with open(out, "rb") as vf:
+                                st.download_button("下载视频", data=vf.read(), file_name=os.path.basename(str(out)), mime="video/mp4", key="dl_topic")
+                        except Exception:
+                            st.info("无法内嵌预览，可手动在文件管理器中打开输出文件。")
+                except Exception as e:
+                    st.session_state['topic_error'] = str(e)
+                    st.error(f"生成失败: {e}")
+                finally:
+                    st.session_state['topic_running'] = False
     else:
         if st.session_state['topic_output']:
             with topic_preview:
