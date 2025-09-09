@@ -80,6 +80,67 @@ streamlit run streamlit.app.py
 
 UI 会将输出固定到 `output/webui/`（除非你覆盖 RUN_ID）。
 
+## 使用 Docker 运行
+
+镜像内已预装 ffmpeg 与中文字体，支持 API 和 Streamlit 两种模式。
+
+### 构建镜像（可选传入国内镜像源）
+
+```cmd
+docker build -t text2video .
+```
+
+可选（使用阿里云源）：
+
+```cmd
+docker build -t text2video ^
+  --build-arg PIP_INDEX_URL=https://mirrors.aliyun.com/pypi/simple ^
+  --build-arg PIP_EXTRA_INDEX_URL=https://pypi.org/simple ^
+  .
+```
+
+### 运行（API 模式，<http://localhost:8000>）
+
+```cmd
+docker run --rm -it ^
+  -p 8000:8000 ^
+  -e RUN_MODE=api ^
+  --env-file .env ^
+  -v "%CD%\output":/app/output ^
+  text2video
+```
+
+### 运行（UI 模式，<http://localhost:8501>）
+
+```cmd
+docker run --rm -it ^
+  -p 8501:8501 ^
+  -e RUN_MODE=ui ^
+  --env-file .env ^
+  -v "%CD%\output":/app/output ^
+  text2video
+```
+
+### 使用 docker-compose（同时提供 api/ui 服务）
+
+```cmd
+docker compose up -d --build
+```
+
+- API: <http://localhost:8000>
+- UI:  <http://localhost:8501>
+
+日志查看：
+
+```cmd
+docker compose logs -f api
+docker compose logs -f ui
+```
+
+提示与常见问题：
+
+- 需要 `.env` 中提供 GUIJI_API_KEY 等参数；compose 已将 `.env` 作为文件挂载到容器并通过 `environment` 注入。
+
 ## API 使用
 
 服务启动后可直接调用：
@@ -98,7 +159,7 @@ curl -X POST "http://127.0.0.1:8000/video/from-topic" ^
 { "output_path": "c:/.../output/<run_id>/final_video.mp4", "blocks_count": 12 }
 ```
 
-2. POST `/video/from-markdown`（直接返回 MP4 文件流）
+1. POST `/video/from-markdown`（直接返回 MP4 文件流）
 
 ```cmd
 curl -X POST "http://127.0.0.1:8000/video/from-markdown" ^
