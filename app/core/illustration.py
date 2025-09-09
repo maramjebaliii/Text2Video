@@ -12,6 +12,7 @@ def generate_illustration_prompts(script_json: str, llm: LLMProvider, model: str
         "您是一位插图提示生成专家，专注于为微课程生成详细的插图提示。"
     )
     prompt = f"""
+### 任务
 生成关于 {script_json} 的插图。返回仅包含多个插图详细信息的 JSON 数组。
 ### 插图描述要素:
 - **主题:** 中心概念。

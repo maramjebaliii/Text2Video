@@ -2,7 +2,7 @@
 
 持久化产物说明（按生成顺序）：
 1) script_raw.json              原始解析/输入脚本（title+content 原文）
-2) script_optimized.json        （可选）LLM 优化（口语化）后脚本
+2) script_optimized.json        LLM 优化（口语化）后脚本
 3) script_expanded.json         每条加入 sentences: list[str]（清理拆句结果），保留原 content
 4) speech/speech_manifest.json  语音清单：title + sentences + audio_files + durations + total_duration
 5) speech/script_items.json     与 script_expanded.json 相同内容副本，便于靠近音频调试
@@ -89,16 +89,15 @@ def build_blocks_from_markdown(
     llm: LLMProvider,
     tts: TTSProvider,
     image: ImageProvider,
-    optimize: bool = True,
     voice: str | None = None,
 ) -> list[dict]:
     """从 Markdown 文本构建带语音与插图的合并区块列表。"""
     script_items = sp.markdown_to_script(markdown_text)
     _write_json(os.path.join(CONFIG.path.output_dir, "script_raw.json"), script_items)
-    if optimize:
-        script_items = sp.optimize_script_for_speech(script_items, llm)
-        _write_json(os.path.join(CONFIG.path.output_dir, "script_optimized.json"), script_items)
-    expanded_records = _expand_with_sentences(script_items)
+    # 口语化优化
+    script_items = sp.optimize_script_for_speech(script_items, llm)
+    _write_json(os.path.join(CONFIG.path.output_dir, "script_optimized.json"), script_items)
+    expanded_records = _expand_with_sentences(script_items) 
     _write_json(os.path.join(CONFIG.path.output_dir, "script_expanded.json"), expanded_records)
     # 语音批处理输入
     tts_input = [{"title": r["title"], "sentences": r["sentences"]} for r in expanded_records]
@@ -114,7 +113,7 @@ def build_blocks_from_markdown(
     )
     # 保存带 sentences 的脚本副本
     _write_json(os.path.join(CONFIG.path.speech_dir, "script_items.json"), expanded_records)
-    # 插图 prompts 使用未拆句版本（优化后或原始）
+    # 插图 prompts 使用未拆句版本
     prompts = generate_illustration_prompts(json.dumps(script_items, ensure_ascii=False), llm)
     _write_json(os.path.join(CONFIG.path.image_dir, "illustration_prompts.json"), prompts)
     illustration_assets = build_illustration_assets(prompts, image)
@@ -134,15 +133,14 @@ def build_blocks_from_script_json(
     llm: LLMProvider,
     tts: TTSProvider,
     image: ImageProvider,
-    optimize: bool = False,
     voice: str | None = None,
 ) -> list[dict]:
     """从已有脚本 JSON 构建带语音与插图的合并区块列表。"""
     script_items = json.loads(script_json)
     _write_json(os.path.join(CONFIG.path.output_dir, "script_raw.json"), script_items)
-    if optimize:
-        script_items = sp.optimize_script_for_speech(script_items, llm)
-        _write_json(os.path.join(CONFIG.path.output_dir, "script_optimized.json"), script_items)
+    # 强制开启口语化优化
+    script_items = sp.optimize_script_for_speech(script_items, llm)
+    _write_json(os.path.join(CONFIG.path.output_dir, "script_optimized.json"), script_items)
     expanded_records = _expand_with_sentences(script_items)
     _write_json(os.path.join(CONFIG.path.output_dir, "script_expanded.json"), expanded_records)
     tts_input = [{"title": r["title"], "sentences": r["sentences"]} for r in expanded_records]

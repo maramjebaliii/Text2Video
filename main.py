@@ -37,7 +37,14 @@ def create_providers():
 	# 图片生成 endpoint 按硅基固定
 	image_base = "https://api.siliconflow.cn/v1/images/generations"
 	llm = SiliconFlowLLMProvider(api_key=api_key, base_url=base_url)
-	image = SiliconFlowImageProvider(api_key=api_key, model=CONFIG.model.image_model, ipm=CONFIG.rate.image_ipm, base_url=image_base)
+	# 统一图片输出目录到 pipeline 的 CONFIG.path.image_dir（默认为 output/images）
+	image = SiliconFlowImageProvider(
+		api_key=api_key,
+		model=CONFIG.model.image_model,
+		ipm=CONFIG.rate.image_ipm,
+		base_url=image_base,
+		output_dir=CONFIG.path.image_dir,
+	)
 	tts = GuijiTTSProvider(api_key=api_key)
 	# 若使用阿里云：
 	# tts = AliyunTTSProvider(access_key_id=os.getenv("ALIBABA_CLOUD_AK",""), access_key_secret=os.getenv("ALIBABA_CLOUD_SK",""))
@@ -49,7 +56,7 @@ def demo_markdown_to_video(output: str | None = None):
 	markdown_text = """# 云计算简介\n\n云计算是一种通过互联网按需提供计算资源的模式。\n\n## 优点\n弹性伸缩、成本优化和高可用。"""
 	llm, tts, image = create_providers()
 	print("[STEP] 构建 blocks ...")
-	blocks = build_blocks_from_markdown(markdown_text, llm=llm, tts=tts, image=image, optimize=False)
+	blocks = build_blocks_from_markdown(markdown_text, llm=llm, tts=tts, image=image)
 	print(f"[INFO] blocks 数量: {len(blocks)}")
 	print("[STEP] 生成视频 ...")
 	assemble_video_from_blocks(blocks, output_path=output)
@@ -62,7 +69,7 @@ def demo_topic_to_video(topic: str = "边缘计算与云计算的协同", output
 	markdown_text = generate_markdown_script(llm=llm, topic=topic, language="zh", max_sections=5)
 	print("[INFO] 生成的 Markdown:\n" + markdown_text)
 	print("[STEP] 构建 blocks ...")
-	blocks = build_blocks_from_markdown(markdown_text, llm=llm, tts=tts, image=image, optimize=False)
+	blocks = build_blocks_from_markdown(markdown_text, llm=llm, tts=tts, image=image)
 	print(f"[INFO] blocks 数量: {len(blocks)}")
 	print("[STEP] 生成视频 ...")
 	assemble_video_from_blocks(blocks, output_path=output)
