@@ -46,6 +46,10 @@ class VideoConfig:
     font_path: str | None = os.getenv("VIDEO_FONT_PATH") or None
     # 默认只给文件名，实际落盘位置在拼装器中与 PathConfig.output_dir 组合
     output_file: Path = Path(os.getenv("VIDEO_OUTPUT", "final_video.mp4"))
+    # ffmpeg 日志控制
+    ffmpeg_log_level: str = os.getenv("FFMPEG_LOGLEVEL", "error")  # quiet|panic|fatal|error|warning|info|verbose|debug
+    ffmpeg_hide_banner: bool = os.getenv("FFMPEG_HIDE_BANNER", "1") == "1"
+    ffmpeg_no_stats: bool = os.getenv("FFMPEG_NOSTATS", "1") == "1"
 
 
 @dataclass(slots=True)

@@ -109,8 +109,18 @@ def assemble_video_from_blocks(
     with open(concat_file, "w", encoding="utf-8") as f:
         for seg in clips:
             f.write(f"file '{seg.as_posix()}'\n")
+    # ffmpeg 最小化日志输出
+    log_args: list[str] = []
+    if vid_cfg.ffmpeg_hide_banner:
+        log_args += ["-hide_banner"]
+    if vid_cfg.ffmpeg_no_stats:
+        log_args += ["-nostats"]
+    if vid_cfg.ffmpeg_log_level:
+        log_args += ["-loglevel", vid_cfg.ffmpeg_log_level]
+
     cmd = [
-        "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", str(concat_file),
+        "ffmpeg", "-y", *log_args,
+        "-f", "concat", "-safe", "0", "-i", str(concat_file),
         "-c", "copy", str(out_path)
     ]
     print(f"[FFMPEG] 拼接输出: {out_path}")
