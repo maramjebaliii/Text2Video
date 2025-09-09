@@ -1,21 +1,57 @@
-# Python
+
+# === Python cache & build ===
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
+*.so
+*.egg-info/
+dist/
+build/
 
-# Virtual environment
+# === Virtual environments & Python env files ===
 .venv/
+venv/
 .env
+.env.*
 
-# Jupyter Notebook
+# === Jupyter Notebooks ===
 .ipynb_checkpoints/
 
-# Output directories
+# === Output & generated data ===
 output/
 output_images/
 audio_output/
+output_images/
+output/*/
+output/*
+segments/
+speech/
+output_images/
+output_images/*
 
-# Logs
+# === Logs & lock files ===
 *.log
+*.tmp
 uv.lock
+
+# === IDE/editor files ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+*.DS_Store
+Thumbs.db
+
+# === Test cache ===
+tests/__pycache__/
+
+# === Misc ===
+*.mp4
+*.wav
+*.png
+*.jpg
+*.jpeg
+*.json
+*.srt

@@ -92,6 +92,8 @@ def build_blocks_from_markdown(
     voice: str | None = None,
 ) -> list[dict]:
     """从 Markdown 文本构建带语音与插图的合并区块列表。"""
+    # 确保本次运行的输出目录存在
+    os.makedirs(CONFIG.path.output_dir, exist_ok=True)
     script_items = sp.markdown_to_script(markdown_text)
     _write_json(os.path.join(CONFIG.path.output_dir, "script_raw.json"), script_items)
     # 口语化优化
@@ -136,6 +138,7 @@ def build_blocks_from_script_json(
     voice: str | None = None,
 ) -> list[dict]:
     """从已有脚本 JSON 构建带语音与插图的合并区块列表。"""
+    os.makedirs(CONFIG.path.output_dir, exist_ok=True)
     script_items = json.loads(script_json)
     _write_json(os.path.join(CONFIG.path.output_dir, "script_raw.json"), script_items)
     # 强制开启口语化优化

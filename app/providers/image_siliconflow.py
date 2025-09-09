@@ -7,6 +7,7 @@ import threading
 from collections import deque
 from urllib.parse import urlparse, unquote
 import requests
+from uuid import uuid4
 
 __all__ = ["SiliconFlowImageProvider"]
 
@@ -76,7 +77,12 @@ class SiliconFlowImageProvider:
         """下载图片并返回绝对路径。"""
         os.makedirs(self.output_dir, exist_ok=True)
         path = urlparse(url).path
-        name = os.path.basename(unquote(path)) or f"image_{int(time.time())}.png"
+        base = os.path.basename(unquote(path)) or f"image_{int(time.time())}.png"
+        stem, ext = os.path.splitext(base)
+        if not ext:
+            ext = ".png"
+        # 追加短 UUID，避免同名覆盖（并发/重复 URL 的情况下）
+        name = f"{stem}_{uuid4().hex[:8]}{ext}"
         file_path = os.path.join(self.output_dir, name)
         resp = requests.get(url, timeout=60)
         resp.raise_for_status()

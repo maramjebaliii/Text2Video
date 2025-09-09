@@ -7,6 +7,7 @@ import subprocess
 import os
 
 from ..config import CONFIG
+from uuid import uuid4
 from ..utils.text import find_font
 from .clip_builder import create_video_clip
 
@@ -43,9 +44,9 @@ def assemble_video_from_blocks(
     font_path = find_font(vid_cfg.font_path)
     if not font_path:
         print("[WARN] 未找到字体，可能出现方块字")
-    # 使用配置中的持久化片段目录，避免临时目录丢失调试信息
+    # 使用配置中的持久化片段目录，按调用再细分一层 UUID，避免同一 run 内并发冲突
     from ..config import CONFIG as _CFG
-    temp_dir = Path(_CFG.path.video_segments_dir)
+    temp_dir = Path(_CFG.path.video_segments_dir) / uuid4().hex[:8]
     temp_dir.mkdir(parents=True, exist_ok=True)
     print(f"[INFO] 片段输出目录: {temp_dir}")
     clips: list[Path] = []
@@ -90,12 +91,19 @@ def assemble_video_from_blocks(
             seg_idx += 1
     if not clips:
         raise RuntimeError("未生成任何片段")
+    # 统一输出根目录 (按运行隔离)
+    run_out_dir = CONFIG.path.output_dir
     if output_path:
         out_path = Path(output_path)
+        # 若给的是目录或以分隔符结尾，则落到该目录下的默认文件名
         if (out_path.exists() and out_path.is_dir()) or str(out_path).endswith(os.sep):
             out_path = out_path / CONFIG.video.output_file.name
+        # 相对路径则拼到本次运行的 output 目录，避免与工作区根目录混放
+        if not out_path.is_absolute():
+            out_path = Path(run_out_dir) / out_path
     else:
-        out_path = CONFIG.video.output_file
+        # 未显式指定时，输出到本次运行目录下的默认文件名
+        out_path = Path(run_out_dir) / CONFIG.video.output_file
     out_path.parent.mkdir(parents=True, exist_ok=True)
     concat_file = temp_dir / "concat.txt"
     with open(concat_file, "w", encoding="utf-8") as f:

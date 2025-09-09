@@ -25,6 +25,7 @@ def generate_illustration_prompts(script_json: str, llm: LLMProvider, model: str
 ### 生成的提示结构:
 描述, 场景, 包含对象, 动作. 以风格呈现, 强调细节。
 ### 输出格式要求
+```json
 [
     {{
         "illustration_id": 1,
@@ -37,6 +38,7 @@ def generate_illustration_prompts(script_json: str, llm: LLMProvider, model: str
         "description": "一幅黑暗幻想肖像，呈现了一匹马奔跑在风暴中，背景火焰般的景观。"
     }}
 ]
+```
 输出格式为JSON。不包含任何额外的文字、解释或评论。
 """
     messages = [
