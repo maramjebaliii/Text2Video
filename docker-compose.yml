@@ -1,0 +1,26 @@
+services:
+  api:
+    build: .
+    image: text2video:latest
+    environment:
+      - RUN_MODE=api
+      - GUIJI_API_KEY=${GUIJI_API_KEY}
+      - GUIJI_BASE_URL=${GUIJI_BASE_URL:-https://api.siliconflow.cn/v1}
+      - VIDEO_WIDTH=${VIDEO_WIDTH:-1280}
+      - VIDEO_HEIGHT=${VIDEO_HEIGHT:-720}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./output:/app/output
+      - ./.env:/app/.env:ro
+  ui:
+    image: text2video:latest
+    environment:
+      - RUN_MODE=ui
+      - GUIJI_API_KEY=${GUIJI_API_KEY}
+      - GUIJI_BASE_URL=${GUIJI_BASE_URL:-https://api.siliconflow.cn/v1}
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./output:/app/output
+      - ./.env:/app/.env:ro

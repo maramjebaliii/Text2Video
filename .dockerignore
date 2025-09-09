@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.venv/
+.env
+
+# VCS
+.git
+.gitignore
+
+# IDE
+.vscode/
+
+# Outputs
+output/
+**/output/
+
+# OS
+.DS_Store
+Thumbs.db
