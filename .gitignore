@@ -55,3 +55,5 @@ tests/__pycache__/
 *.jpeg
 *.json
 *.srt.idea
+uv.lock 
+.python-version
