@@ -1,5 +1,7 @@
 # Text2Video
 
+![](https://oss-liuchengtu.hudunsoft.com/userimg/e7/e7297caa019b5634cebf47b9b3789d5b.png)
+
 从主题或 Markdown 自动生成讲解视频的端到端小工具：调用 LLM 生成/优化脚本，批量 TTS 合成语音，生成插画图片，自动合并字幕面板与音频为片段并用 ffmpeg 拼接为最终 MP4。支持 FastAPI 与本地 Streamlit Web UI。
 ![](https://oss-liuchengtu.hudunsoft.com/userimg/f8/f8475483bb81d8e07ee71a388b6ee3ee.png)
 ![](https://oss-liuchengtu.hudunsoft.com/userimg/47/47202368777bb4124d11400d8cac1fd0.png)
