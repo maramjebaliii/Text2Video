@@ -37,7 +37,7 @@ uv.lock
 
 # === IDE/editor files ===
 .vscode/
-.idea/
+.idea
 *.swp
 *.swo
 *.bak
@@ -54,4 +54,4 @@ tests/__pycache__/
 *.jpg
 *.jpeg
 *.json
-*.srt
+*.srt.idea
