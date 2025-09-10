@@ -1,28 +1,47 @@
 """统一配置加载。
 
-后续可扩展：读取 .env / 命令行 / 数据库。
-当前仅提供简单默认值与环境变量读取辅助。
+加载优先级（高 -> 低）：
+ 1. 根目录 `config.yaml`（如果存在）
+ 2. 环境变量（包括 `.env`）
+ 3. 内置默认值
+
+为了避免在代码中硬编码 secret，`config.yaml` 不应提交到 git，仓库提供 `config.example.yaml` 供参考。
 """
 from __future__ import annotations
 import os
 from dataclasses import dataclass, field
 from uuid import uuid4
 from pathlib import Path
+from typing import Any, Dict
+
+# 尝试读取项目根的 config.yaml（若存在），优先覆盖环境变量
+_ROOT = Path(__file__).resolve().parent.parent.parent
+_CONFIG_YAML_PATH = _ROOT / "config.yaml"
+_yaml_config: Dict[str, Any] = {}
+try:
+    import yaml
+
+    if _CONFIG_YAML_PATH.exists():
+        with _CONFIG_YAML_PATH.open("r", encoding="utf-8") as f:
+            _yaml_config = yaml.safe_load(f) or {}
+except Exception:
+    # 如果没有安装 PyYAML 或解析失败，保持 _yaml_config 为空，后续会回退到环境变量
+    _yaml_config = {}
 
 
 @dataclass(slots=True)
 class ModelConfig:
-    chat_model: str = os.getenv("GUIJI_CHAT_MODEL", "Qwen/Qwen2.5-7B-Instruct")
-    tts_model_guiji: str = os.getenv("GUIJI_TTS_MODEL", "FunAudioLLM/CosyVoice2-0.5B")
-    tts_model_aliyun: str = os.getenv("ALIYUN_TTS_MODEL", "cosyvoice-v1")
-    image_model: str = os.getenv("GUIJI_IMAGE_MODEL", "Kwai-Kolors/Kolors")
+    chat_model: str = _yaml_config.get("GUIJI_CHAT_MODEL") or os.getenv("GUIJI_CHAT_MODEL", "Qwen/Qwen2.5-7B-Instruct")
+    tts_model_guiji: str = _yaml_config.get("GUIJI_TTS_MODEL") or os.getenv("GUIJI_TTS_MODEL", "FunAudioLLM/CosyVoice2-0.5B")
+    tts_model_aliyun: str = _yaml_config.get("ALIYUN_TTS_MODEL") or os.getenv("ALIYUN_TTS_MODEL", "cosyvoice-v1")
+    image_model: str = _yaml_config.get("GUIJI_IMAGE_MODEL") or os.getenv("GUIJI_IMAGE_MODEL", "Kwai-Kolors/Kolors")
 
 
 @dataclass(slots=True)
 class PathConfig:
-    base_dir: str = os.getcwd()
+    base_dir: str = _yaml_config.get("BASE_DIR") or os.getcwd()
     # 为每次运行生成一个短 UUID（或可通过环境变量 RUN_ID 指定），用于隔离并发输出
-    run_id: str = field(default_factory=lambda: os.getenv("RUN_ID") or uuid4().hex[:8])
+    run_id: str = field(default_factory=lambda: _yaml_config.get("RUN_ID") or os.getenv("RUN_ID") or uuid4().hex[:8])
     # 以下路径在 __post_init__ 中基于 run_id 构建
     output_dir: str = ""
     speech_dir: str = ""
@@ -40,10 +59,10 @@ class PathConfig:
 @dataclass(slots=True)
 class VideoConfig:
     """视频相关配置。"""
-    width: int = int(os.getenv("VIDEO_WIDTH", "1280"))
-    height: int = int(os.getenv("VIDEO_HEIGHT", "720"))
-    debug: bool = os.getenv("VIDEO_DEBUG", "0") == "1"
-    font_path: str | None = os.getenv("VIDEO_FONT_PATH") or None
+    width: int = int(_yaml_config.get("VIDEO_WIDTH") or os.getenv("VIDEO_WIDTH", "1280"))
+    height: int = int(_yaml_config.get("VIDEO_HEIGHT") or os.getenv("VIDEO_HEIGHT", "720"))
+    debug: bool = (_yaml_config.get("VIDEO_DEBUG") == True) or (os.getenv("VIDEO_DEBUG", "0") == "1")
+    font_path: str | None = _yaml_config.get("VIDEO_FONT_PATH") or os.getenv("VIDEO_FONT_PATH") or None
     # 默认只给文件名，实际落盘位置在拼装器中与 PathConfig.output_dir 组合
     output_file: Path = Path(os.getenv("VIDEO_OUTPUT", "final_video.mp4"))
     # ffmpeg 日志控制
@@ -54,7 +73,7 @@ class VideoConfig:
 
 @dataclass(slots=True)
 class RateConfig:
-    image_ipm: int = int(os.getenv("IMAGE_IPM", "2"))
+    image_ipm: int = int(_yaml_config.get("IMAGE_IPM") or os.getenv("IMAGE_IPM", "2"))
 
 
 @dataclass(slots=True)

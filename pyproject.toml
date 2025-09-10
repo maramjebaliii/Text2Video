@@ -16,6 +16,7 @@ dependencies = [
 	"fastapi>=0.110.0",
 	"uvicorn>=0.23.0",
 	"streamlit>=1.33.0",
+	"pyyaml>=6.0.2",
 ]
 
 [build-system]

@@ -1,0 +1,8 @@
+# Example configuration file (do not commit secrets). Copy to `config.yaml` and edit.
+
+GUIJI_API_KEY: "your_api_key_here"
+GUIJI_BASE_URL: "https://api.siliconflow.cn/v1"
+GUIJI_IMAGE_BASE_URL: "https://api.siliconflow.cn/v1/images/generations"
+GUIJI_IMAGE_MODEL: "Kwai-Kolors/Kolors"
+GUIJI_CHAT_MODEL: "Qwen/Qwen2.5-32B-Instruct"
+
