@@ -1,5 +1,16 @@
 # Text2Video - AI 驱动的视频自动生成工具
 
+> 项目仓库地址（欢迎 Star ⭐）：[https://github.com/li-xiu-qi/Text2Video](https://github.com/li-xiu-qi/Text2Video)
+
+快速克隆：
+
+```bash
+git clone https://github.com/li-xiu-qi/Text2Video.git
+cd Text2Video
+```
+
+
+
 ![Text2Video Banner](https://oss-liuchengtu.hudunsoft.com/userimg/e7/e7297caa019b5634cebf47b9b3789d5b.png)
 
 Text2Video 是一个功能强大的端到端视频自动化生成工具，能够从简单的主题或 Markdown 文档快速创建高质量的讲解视频。本工具集成了最新的 AI 技术栈，包括 LLM 脚本生成与优化、TTS 语音合成、AI 图像生成，以及 FFmpeg 视频后处理，为用户提供完整的视频制作解决方案。
