@@ -18,10 +18,6 @@ def guiji_text2speech(
 ) -> str:
     """调用 SiliconFlow 文本转语音 API 并落盘，返回音频文件绝对路径。
 
-    与原版不同：
-    1. 支持 filename 参数，若外部传入（例如批处理生成的 hash），优先使用，实现可重复缓存。
-    2. 若未提供 filename，则自动生成：guiji_<ts>_<uuid8>
-    3. 避免之前固定 output_<voice>.mp3 导致的覆盖问题。
     """
     if not text or not text.strip():
         raise ValueError("text 不能为空")

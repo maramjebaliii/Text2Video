@@ -57,3 +57,4 @@ tests/__pycache__/
 *.srt.idea
 uv.lock 
 .python-version
+tests/ai_studio
