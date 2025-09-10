@@ -201,31 +201,31 @@ if __name__ == '__main__':
 
 
 
-    from dotenv import load_dotenv
-    import os
-    load_dotenv()
-    api_key = os.getenv("GUIJI_KEY")
-    text_en = "I'm so happy, Spring Festival is coming!"
-    text_cn = "我太开心了，春节快到了！"
-    voices = [
-        "FunAudioLLM/CosyVoice2-0.5B:anna",
-        "FunAudioLLM/CosyVoice2-0.5B:bella",
-        "FunAudioLLM/CosyVoice2-0.5B:benjamin",
-        "FunAudioLLM/CosyVoice2-0.5B:charles",
-        "FunAudioLLM/CosyVoice2-0.5B:claire",
-        "FunAudioLLM/CosyVoice2-0.5B:david",
-        "FunAudioLLM/CosyVoice2-0.5B:diana"
-    ]
-    out_dir = "audio_output"
-    os.makedirs(out_dir, exist_ok=True)
-    for voice in voices:
-        try:
-            path_en = guiji_text2speech(api_key, text_en, voice=voice, out_dir=out_dir)
-            print(path_en)
-        except Exception as e:
-            print(f"{voice} 英文生成失败: {e}")
-        try:
-            path_cn = guiji_text2speech(api_key, text_cn, voice=voice, out_dir=out_dir)
-            print(path_cn)
-        except Exception as e:
-            print(f"{voice} 中文生成失败: {e}")
+    # from dotenv import load_dotenv
+    # import os
+    # load_dotenv()
+    # api_key = os.getenv("GUIJI_KEY")
+    # text_en = "I'm so happy, Spring Festival is coming!"
+    # text_cn = "我太开心了，春节快到了！"
+    # voices = [
+    #     "FunAudioLLM/CosyVoice2-0.5B:anna",
+    #     "FunAudioLLM/CosyVoice2-0.5B:bella",
+    #     "FunAudioLLM/CosyVoice2-0.5B:benjamin",
+    #     "FunAudioLLM/CosyVoice2-0.5B:charles",
+    #     "FunAudioLLM/CosyVoice2-0.5B:claire",
+    #     "FunAudioLLM/CosyVoice2-0.5B:david",
+    #     "FunAudioLLM/CosyVoice2-0.5B:diana"
+    # ]
+    # out_dir = "audio_output"
+    # os.makedirs(out_dir, exist_ok=True)
+    # for voice in voices:
+    #     try:
+    #         path_en = guiji_text2speech(api_key, text_en, voice=voice, out_dir=out_dir)
+    #         print(path_en)
+    #     except Exception as e:
+    #         print(f"{voice} 英文生成失败: {e}")
+    #     try:
+    #         path_cn = guiji_text2speech(api_key, text_cn, voice=voice, out_dir=out_dir)
+    #         print(path_cn)
+    #     except Exception as e:
+    #         print(f"{voice} 中文生成失败: {e}")

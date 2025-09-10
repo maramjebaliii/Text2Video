@@ -62,7 +62,11 @@ def batch_synthesize(
     reuse_manifest: bool = True,
     unique_filenames: bool = True,
 ) -> list[dict]:
-    """批量合成脚本项语音并返回包含音频路径与时长的结构 (持久化)。"""
+    """批量合成脚本项语音并返回包含音频路径与时长的结构 (持久化)。
+
+    注意: 复用 manifest 时不会校验文本与脚本是否完全一致(简单策略)。
+    若脚本文本更新, 请删除 manifest 或设置 reuse_manifest=False。
+    """
     if not isinstance(script_items, list):
         raise TypeError("script_items 必须是 list")
     if not script_items:

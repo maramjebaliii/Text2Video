@@ -1,177 +1,439 @@
-# Text2Video
+# Text2Video - AI 驱动的视频自动生成工具
 
-![](https://oss-liuchengtu.hudunsoft.com/userimg/e7/e7297caa019b5634cebf47b9b3789d5b.png)
+![Text2Video Banner](https://oss-liuchengtu.hudunsoft.com/userimg/e7/e7297caa019b5634cebf47b9b3789d5b.png)
 
-从主题或 Markdown 自动生成讲解视频的端到端小工具：调用 LLM 生成/优化脚本，批量 TTS 合成语音，生成插画图片，自动合并字幕面板与音频为片段并用 ffmpeg 拼接为最终 MP4。支持 FastAPI 与本地 Streamlit Web UI。
-![](https://oss-liuchengtu.hudunsoft.com/userimg/f8/f8475483bb81d8e07ee71a388b6ee3ee.png)
-![](https://oss-liuchengtu.hudunsoft.com/userimg/47/47202368777bb4124d11400d8cac1fd0.png)
+Text2Video 是一个功能强大的端到端视频自动化生成工具，能够从简单的主题或 Markdown 文档快速创建高质量的讲解视频。本工具集成了最新的 AI 技术栈，包括 LLM 脚本生成与优化、TTS 语音合成、AI 图像生成，以及 FFmpeg 视频后处理，为用户提供完整的视频制作解决方案。
+
+## 🎯 项目特色
+
+![Demo Interface](https://oss-liuchengtu.hudunsoft.com/userimg/f8/f8475483bb81d8e07ee71a388b6ee3ee.png)
+
+### 🚀 一键式视频生成
+
+- 输入主题关键词，自动生成完整的教学视频
+- 支持 Markdown 文档直接转换为视频内容
+
+### 🤖 AI 全流程自动化
+
+- LLM 智能脚本生成与口语化优化
+- TTS 高质量语音合成
+- AI 驱动的插画图片生成
+- 智能字幕时间轴计算
+
+### 🔧 灵活的部署方式
+
+- FastAPI 后端服务，支持 RESTful API 调用
+- Streamlit Web UI，提供友好的图形界面
+- Docker 容器化部署，一键启动服务
+
+![Video Generation Process](https://oss-liuchengtu.hudunsoft.com/userimg/47/47202368777bb4124d11400d8cac1fd0.png)
 
 ## 功能亮点
 
-- 输入两种来源：
-  - Topic → 自动生成 Markdown → 生成视频
-  - Markdown → 直接生成视频
-- 全流程持久化产物：脚本(JSON)、语音清单、插画提示与图片、字幕 JSON/SRT、合并后的 blocks、最终视频
-- Provider 可插拔：LLM、TTS、图片生成均通过抽象接口注入
+Text2Video 提供两种灵活的输入方式，满足不同用户的需求：
 
-## 环境要求
+### 📝 双重输入源支持
 
-- Python 3.11+
-- FFmpeg 已安装并可在 PATH 中被找到（pydub/ffmpeg 调用需要）
-  - Windows 可到 [FFmpeg Builds](https://www.gyan.dev/ffmpeg/builds/) 下载解压，将 `bin` 目录加入系统 PATH
+- **主题驱动模式**：`Topic → 自动生成 Markdown → 生成视频`
+  - 只需输入一个主题关键词或简短描述
+  - AI 自动扩展为结构化的 Markdown 内容
+  - 适合快速创建教学或介绍类视频
 
-## 安装
+- **Markdown 直接模式**：`Markdown → 直接生成视频`
+  - 支持现有 Markdown 文档的直接导入
+  - 保持原有内容结构和逻辑
+  - 适合已有文档的视频化转换
 
-使用 pip（推荐在虚拟环境内）：
+### 🔄 全流程持久化机制
+
+项目实现了完整的中间产物持久化策略，确保每个步骤的输出都可追溯和复用：
+
+- **脚本文件**：`script_raw.json`、`script_optimized.json`、`script_expanded.json`
+- **语音资产**：音频文件、时长缓存、语音清单
+- **视觉资产**：插画提示词、生成的图片文件
+- **字幕文件**：支持 JSON 和 SRT 双格式输出
+- **最终产品**：合并后的视频块和完整 MP4 文件
+
+### 🔌 Provider 可插拔架构
+
+采用抽象接口设计，支持多种 AI 服务提供商的灵活切换：
+
+- **LLM Provider**：支持不同的大语言模型服务
+- **TTS Provider**：可配置多种语音合成服务
+- **Image Provider**：支持多个 AI 图像生成平台
+- **扩展性**：轻松添加新的服务提供商支持
+
+## 📋 环境要求
+
+在开始使用 Text2Video 之前，请确保您的系统满足以下要求：
+
+### 基础环境
+
+- **Python 版本**：3.11 或更高版本
+- **操作系统**：支持 Windows、macOS、Linux
+
+### 必需组件
+
+#### FFmpeg 安装与配置
+
+FFmpeg 是本项目的核心依赖，用于音视频处理和最终视频合成。
+
+**Windows 用户**：
+
+1. 访问 [FFmpeg Builds](https://www.gyan.dev/ffmpeg/builds/) 下载最新版本
+2. 解压下载的文件到任意目录（如 `C:\ffmpeg`）
+3. 将 FFmpeg 的 `bin` 目录添加到系统环境变量 PATH 中
+4. 打开命令提示符，运行 `ffmpeg -version` 验证安装
+
+**macOS 用户**：
+
+```bash
+# 使用 Homebrew 安装
+brew install ffmpeg
+
+# 验证安装
+ffmpeg -version
+```
+
+**Linux 用户**：
+
+```bash
+# Ubuntu/Debian
+sudo apt update
+sudo apt install ffmpeg
+
+# CentOS/RHEL
+sudo yum install ffmpeg
+
+# 验证安装
+ffmpeg -version
+```
+
+
+## 🚀 快速开始
+
+### 方法一：使用 pip 安装
+
+建议在虚拟环境中安装，以避免依赖冲突：
 
 ```cmd
+# 创建虚拟环境
 python -m venv .venv
+
+# 激活虚拟环境（Windows）
 .venv\Scripts\activate
+
+# 激活虚拟环境（macOS/Linux）
+source .venv/bin/activate
+
+# 升级 pip 到最新版本
 python -m pip install -U pip
+
+# 安装项目依赖
 pip install .
 ```
 
-可选：若你使用 uv 包管理器，则在仓库根目录运行：
+### 方法二：使用 UV 包管理器
+
+如果您使用现代化的 UV 包管理器，可以更快速地完成环境配置：
 
 ```cmd
+# 一键同步所有依赖
 uv sync
+
+# 自动创建并激活虚拟环境
+uv run python main.py
 ```
 
-## 准备配置（.env）
+**UV 的优势**：
 
-在项目根目录创建 `.env` 文件，至少配置必需的 API Key：
-下面使用的key来自硅基流动，你可以去<https://cloud.siliconflow.cn/i/FcjKykMn获取，或者![硅基流动>](<https://cloud.siliconflow.cn/i/FcjKykMn)，>
+- 更快的依赖解析和安装速度
+- 自动虚拟环境管理
+- 更好的依赖冲突检测
+
+## ⚙️ 配置设置
+
+### 创建配置文件
+
+在项目根目录创建 `.env` 文件，配置必需的 API 密钥和服务参数。
+
+#### 获取硅基流动 API Key
+
+本项目默认使用[硅基流动](https://cloud.siliconflow.cn/i/FcjKykMn)作为 AI 服务提供商，提供高质量的 LLM、TTS 和图像生成服务。
+
+1. 访问 [硅基流动官网](https://cloud.siliconflow.cn/i/FcjKykMn) 注册账号
+2. 在控制台创建 API Key
+3. 将 API Key 配置到 `.env` 文件中
+
+#### 配置文件示例
 
 ```ini
-# 必填：用于 LLM / TTS / Image（硅基流动）
-GUIJI_API_KEY=你的_API_Key
+# ===========================================
+# 硅基流动 API 配置（必填）
+# ===========================================
+GUIJI_API_KEY=sk-your-api-key-here
 GUIJI_BASE_URL=https://api.siliconflow.cn/v1
+
+# ===========================================
+# AI 模型配置
+# ===========================================
+# 大语言模型（用于脚本生成和优化）
 GUIJI_CHAT_MODEL=Qwen/Qwen2.5-7B-Instruct
+
+# 图像生成模型（用于插画创建）
 GUIJI_IMAGE_MODEL=Kwai-Kolors/Kolors
+
+# 语音合成模型（用于配音生成）
 GUIJI_TTS_MODEL=FunAudioLLM/CosyVoice2-0.5B
 
+
 ```
 
-## 运行方式
+### 配置验证
 
-你可以选择运行 API 或本地 Web UI（或同时）。
-
-### 方式 A：启动 FastAPI 服务
+创建配置文件后，可以通过以下方式验证配置是否正确：
 
 ```cmd
+# 测试 API 连接
+python -c "from app.core.config import settings; print('✅ 配置加载成功')"
+
+# 测试硅基流动 API
+python tests/test_api_routes.py
+```
+
+## 🏃‍♂️ 运行服务
+
+Text2Video 提供两种运行模式，您可以根据需求选择合适的方式：
+
+### 模式一：FastAPI 后端服务
+
+FastAPI 服务提供 RESTful API 接口，适合集成到其他应用或进行批量处理。
+
+#### 开发模式启动
+
+```cmd
+# 方式 1：直接运行（推荐）
 python main.py
-```
 
-默认监听 `http://127.0.0.1:8000`（开发模式可热重载）。
-
-也可使用 uvicorn：
-
-```cmd
+# 方式 2：使用 uvicorn（更多自定义选项）
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### 方式 B：启动 Streamlit Web UI
+服务启动后，访问以下地址：
+
+- **API 文档**：<http://127.0.0.1:8000/docs> （Swagger UI）
+- **备用文档**：<http://127.0.0.1:8000/redoc> （ReDoc）
+
+
+
+### 模式二：Streamlit Web UI
+
+Streamlit 提供友好的图形界面，适合非技术用户和快速原型验证。
 
 ```cmd
 streamlit run streamlit.app.py
 ```
 
-浏览器会自动打开一个包含两个 Tab 的简易界面：
+启动后浏览器会自动打开，界面包含两个功能模块：
 
-- Markdown → 视频：输入或上传 Markdown，一键生成
-- Topic → 视频：填写主题与参数，先生成 Markdown，再生成视频
+#### 🎬 Markdown → 视频
 
-UI 会将输出固定到 `output/webui/`（除非你覆盖 RUN_ID）。
+- 直接输入 Markdown 内容
+- 支持文件上传（.md 格式）
+- 一键生成视频，实时查看进度
 
-## 使用 Docker 运行
+#### 🎯 Topic → 视频  
 
-镜像内已预装 ffmpeg 与中文字体，支持 API 和 Streamlit 两种模式。
+- 输入主题关键词或描述
+- 配置生成参数（段落数、语言等）
+- AI 自动扩展为 Markdown 后生成视频
 
-### 构建镜像（可选传入国内镜像源）
+**Web UI 特色功能**：
+
+- 实时进度显示
+- 中间产物预览
+- 视频在线播放
+- 一键下载结果
+
+> 💡 **提示**：Web UI 默认将输出保存到 `output/webui/` 目录，便于管理和查找。
+
+## 🐳 Docker 容器化部署
+
+Docker 镜像内已预装 FFmpeg 和中文字体，支持开箱即用的容器化部署。
+
+### 构建 Docker 镜像
+
+#### 基础构建
 
 ```cmd
 docker build -t text2video .
 ```
 
-可选（使用阿里云源）：
+#### 使用国内镜像源
 
 ```cmd
-docker build -t text2video ^
-  --build-arg PIP_INDEX_URL=https://mirrors.aliyun.com/pypi/simple ^
-  --build-arg PIP_EXTRA_INDEX_URL=https://pypi.org/simple ^
+docker build -t text2video \
+  --build-arg PIP_INDEX_URL=https://mirrors.aliyun.com/pypi/simple \
+  --build-arg PIP_EXTRA_INDEX_URL=https://pypi.org/simple \
   .
 ```
 
-### 运行（API 模式，<http://localhost:8000>）
+### 单容器运行模式
+
+#### API 服务模式
+
+启动 FastAPI 后端服务：
 
 ```cmd
-docker run --rm -it ^
-  -p 8000:8000 ^
-  -e RUN_MODE=api ^
-  --env-file .env ^
-  -v "%CD%\output":/app/output ^
+docker run --rm -it \
+  -p 8000:8000 \
+  -e RUN_MODE=api \
+  --env-file .env \
+  -v "%CD%\output":/app/output \
   text2video
 ```
 
-### 运行（UI 模式，<http://localhost:8501>）
+访问地址：<http://localhost:8000>
+
+#### Web UI 模式
+
+启动 Streamlit 界面：
 
 ```cmd
-docker run --rm -it ^
-  -p 8501:8501 ^
-  -e RUN_MODE=ui ^
-  --env-file .env ^
-  -v "%CD%\output":/app/output ^
+docker run --rm -it \
+  -p 8501:8501 \
+  -e RUN_MODE=ui \
+  --env-file .env \
+  -v "%CD%\output":/app/output \
   text2video
 ```
 
-### 使用 docker-compose（同时提供 api/ui 服务）
+访问地址：<http://localhost:8501>
+
+### Docker Compose 集群部署
+
+使用 Docker Compose 可以同时运行 API 和 Web UI 服务：
 
 ```cmd
+# 启动所有服务
 docker compose up -d --build
+
+# 查看服务状态
+docker compose ps
+
+# 停止所有服务
+docker compose down
 ```
 
-- API: <http://localhost:8000>
-- UI:  <http://localhost:8501>
+服务访问地址：
 
-日志查看：
+- **API 服务**：<http://localhost:8000>
+- **Web UI**：<http://localhost:8501>
+
+#### 日志查看与调试
 
 ```cmd
+# 查看 API 服务日志
 docker compose logs -f api
+
+# 查看 Web UI 服务日志
 docker compose logs -f ui
+
+# 查看所有服务日志
+docker compose logs -f
 ```
 
-提示与常见问题：
+### Docker 部署注意事项
 
-- 需要 `.env` 中提供 GUIJI_API_KEY 等参数；compose 已将 `.env` 作为文件挂载到容器并通过 `environment` 注入。
+**环境变量配置**：
 
-## API 使用
+- 确保 `.env` 文件包含完整的 `GUIJI_API_KEY` 配置
+- Docker Compose 会自动将 `.env` 文件挂载到容器内
 
-服务启动后可直接调用：
 
-1. POST `/video/from-topic`（返回 JSON，含输出路径与 blocks 数量）
 
-```cmd
-curl -X POST "http://127.0.0.1:8000/video/from-topic" ^
- -H "Content-Type: application/json" ^
- -d "{\"topic\":\"边缘计算与云计算的协同\",\"language\":\"zh\",\"max_sections\":5}"
+## 📡 API 使用指南
+
+Text2Video 提供简洁易用的 RESTful API，支持两种视频生成模式。
+
+### API 端点概览
+
+| 端点 | 方法 | 功能 | 响应格式 |
+|------|------|------|----------|
+| `/video/from-topic` | POST | 从主题生成视频 | JSON |
+| `/video/from-markdown` | POST | 从 Markdown 生成视频 | MP4 二进制流 |
+
+### 端点一：主题生成视频
+
+从主题关键词自动生成视频内容。
+
+#### 主题生成请求示例
+
+```bash
+curl -X POST "http://127.0.0.1:8000/video/from-topic" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "topic": "边缘计算与云计算的协同",
+    "language": "zh",
+    "max_sections": 5,
+    "run_id": "my-custom-id"
+  }'
 ```
 
-响应示例：
+#### 主题生成请求参数
+
+| 参数 | 类型 | 必填 | 说明 | 默认值 |
+|------|------|------|------|--------|
+| `topic` | string | ✅ | 视频主题或关键词 | - |
+| `language` | string | ❌ | 内容语言（zh/en） | "zh" |
+| `max_sections` | integer | ❌ | 最大章节数量 | 5 |
+| `run_id` | string | ❌ | 自定义运行ID | 随机生成 |
+
+#### 响应示例
 
 ```json
-{ "output_path": "c:/.../output/<run_id>/final_video.mp4", "blocks_count": 12 }
+{
+  "output_path": "c:/path/to/output/abc123/final_video.mp4",
+  "blocks_count": 12,
+  "run_id": "abc123",
+  "duration": 185.6,
+  "status": "success"
+}
 ```
 
-1. POST `/video/from-markdown`（直接返回 MP4 文件流）
+### 端点二：Markdown 生成视频
 
-```cmd
-curl -X POST "http://127.0.0.1:8000/video/from-markdown" ^
- -H "Content-Type: application/json" ^
- -d "{\"markdown\":\"# 标题\\n内容...\"}" ^
- -o result.mp4
+直接从 Markdown 内容生成视频文件。
+
+#### Markdown 生成请求示例
+
+```bash
+curl -X POST "http://127.0.0.1:8000/video/from-markdown" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "markdown": "# 人工智能简介\n\n人工智能是计算机科学的一个分支...",
+    "output": "ai-intro-video.mp4"
+  }' \
+  -o result.mp4
 ```
 
-可选 body 字段 `output`：指定输出目录或文件名（相对路径会拼到本次运行的 `output/<run_id>/` 下）。
+#### Markdown 生成请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `markdown` | string | ✅ | Markdown 格式的内容 |
+| `output` | string | ❌ | 输出文件名或路径 |
+| `run_id` | string | ❌ | 自定义运行ID |
+
+#### 响应格式
+
+直接返回 MP4 视频文件的二进制流，适合直接保存或下载。
+
+### 使用技巧
+
+1. **批量处理**：可通过脚本循环调用 API 实现批量视频生成
+2. **进度监控**：通过 `run_id` 可以在文件系统中跟踪生成进度
+3. **输出管理**：使用自定义 `output` 参数组织生成的视频文件
 
 ## 输出与中间产物
 
@@ -357,3 +619,346 @@ _SYSTEM_INSTRUCTION = """
 """
 
 ```
+
+语音生成的部分，使用的是来自硅基流动的一个tts模型实现。
+如下代码所示：
+
+```python
+    def synthesize(
+        self,
+        text: str,
+        *,
+        voice: str | None = None,
+        out_dir: str = "audio_output",
+        filename: Optional[str] = None,
+        response_format: str = "mp3",
+        sample_rate: int = 44100,
+        stream: bool = False,
+        speed: float = 1.0,
+        gain: float = 0.0,
+    ) -> str:
+        """合成单条文本语音并保存为本地文件，返回绝对路径。"""
+        if not text.strip():
+            raise ValueError("text 不能为空")
+        os.makedirs(out_dir, exist_ok=True)
+        base_name = filename or f"guiji_{int(time.time())}_{uuid4().hex[:8]}"
+        url = "https://api.siliconflow.cn/v1/audio/speech"
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "model": self.model,
+            "input": text,
+            "response_format": response_format,
+            "sample_rate": sample_rate,
+            "stream": stream,
+            "speed": speed,
+            "gain": gain,
+        }
+        use_voice = voice or self.default_voice
+        if use_voice:
+            payload["voice"] = f"{self.model}:{use_voice}"
+        resp = requests.post(url, headers=headers, json=payload, timeout=self.timeout)
+        if resp.status_code != 200:
+            raise RuntimeError(
+                f"guiji TTS 请求失败: {resp.status_code} {resp.text[:200]}"
+            )
+        audio_path = os.path.abspath(os.path.join(out_dir, f"{base_name}.{response_format}"))
+        if os.path.exists(audio_path):  # 极少数情况下名称冲突
+            audio_path = os.path.abspath(
+                os.path.join(out_dir, f"{base_name}_{uuid4().hex[:6]}.{response_format}")
+            )
+        with open(audio_path, "wb") as f:
+            f.write(resp.content)
+        return audio_path
+
+```
+
+在生成语音之后我们需要获取语音的时长，这里使用了一个第三方库：pydub 来实现。
+如下代码所示：
+
+```python
+from typing import Optional
+from pydub import AudioSegment
+
+
+def get_audio_duration(audio_path: str) -> float:
+    """获取音频时长，单位秒"""
+    audio = AudioSegment.from_file(audio_path)
+    return audio.duration_seconds
+
+def probe_duration(path: str) -> Optional[float]:
+    """探测音频文件时长（秒）。失败返回 None，由调用方再做估算兜底。"""
+    try:
+        audio = AudioSegment.from_file(path)
+        return len(audio) / 1000.0
+    except Exception:
+        return None
+
+if __name__ == "__main__":
+    audio_path = r"C:\Users\ke\Documents\projects\python_projects\Text2Video\tests\audio_output\guiji_1757503555_9b16f38e.mp3"
+    duration = get_audio_duration(audio_path)
+    print(f"音频时长: {duration:.2f} 秒")
+    # 试试probe_duration
+    duration2 = probe_duration(audio_path)
+    print(f"探测时长: {duration2:.2f} 秒")
+```
+
+我们这里使用了两种方式来获取音频时长，一种是通过使用duration_seconds属性，另一种是通过使用pydub库的AudioSegment类获取里面的ms，也就是毫秒数，然后除以1000.0，得到秒数。当然，你还可以使用ffprobe读取秒数，比如下面的命令：
+
+```bash
+ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "test.mp3"
+```
+
+运行上面的命令之后会直接输出：
+
+```bash
+3.082438
+```
+
+也可以使用ffmpeg + findstr的方式获取对应的秒数。
+
+```bash
+ffmpeg -i "test.mp3" 2>&1 | findstr /C:"Duration"
+
+```
+
+输出结果大概是这样的：
+
+```bash
+  Duration: 00:00:03.08, start: 0.000000, bitrate: 131 kb/s
+```
+
+不过两者都属于 FFmpeg 套件，通常一起安装并放在 PATH 中。所以我推荐你使用ffprobe即可。
+
+他们两者的区别：
+
+ffmpeg是一个功能丰富的多媒体处理工具，负责编码/解码、转码、复用/解复用、滤镜处理（裁剪、缩放、overlay、转场、转码等）以及从输入生成输出的所有实际处理工作。典型场景：把图片和音频合成视频、把 mp3 转 wav、裁剪视频、添加字幕等。
+
+ffprobe是一个用于“探测/读取媒体元数据”的工具，轻量、专注于报告文件信息（时长、格式、流信息、比特率、帧率等）。不做转码，只读信息，便于脚本里用来判断和决策（例如读取音频时长）。
+
+下面是一个通过硅基流动的文本生成图片的一个请求示例，代码如下所示：
+
+```python
+import requests
+import os
+import time
+from urllib.parse import urlparse, unquote
+from collections import deque
+import threading
+
+
+class ImageGenerator:
+    """图像生成器类，支持 IPM（images per minute）速率限制并将生成的第一张图片下载到本地。
+
+    使用示例：
+        g = ImageGenerator(api_key, ipm=2)
+        path = g.generate_and_save(prompt)
+    """
+
+    def __init__(
+        self,
+        api_key: str,
+        model: str = "Kwai-Kolors/Kolors",
+        base_url: str = "https://api.siliconflow.cn/v1/images/generations",
+        ipm: int = 2,
+        output_dir: str = "output_images",
+        timeout: int = 30,
+    ):
+        self.api_key = api_key
+        self.model = model
+        self.base_url = base_url
+        self.ipm = max(1, int(ipm))
+        self.output_dir = output_dir
+        self.timeout = timeout
+
+        # deque 用于记录一分钟内的调用时间戳
+        self._calls = deque()
+        self._lock = threading.Lock()
+
+    def _wait_for_slot(self):
+        """如果一分钟内调用已达 ipm，等待至有可用槽位为止。"""
+        with self._lock:
+            now = time.time()
+            # 清理 60 秒之前的时间戳
+            while self._calls and now - self._calls[0] >= 60:
+                self._calls.popleft()
+
+            if len(self._calls) < self.ipm:
+                # 还有槽位，记录当前调用时间戳并返回
+                self._calls.append(now)
+                return
+
+            # 已满，计算需等待时间
+            earliest = self._calls[0]
+            wait = 60 - (now - earliest)
+
+        # 在锁外睡眠，避免阻塞其他线程的检查
+        if wait > 0:
+            time.sleep(wait)
+
+        # 递归/循环直到能加入
+        return self._wait_for_slot()
+
+    def _extract_first_image_url(self, resp_json: dict) -> str:
+        img_url = None
+        if isinstance(resp_json, dict):
+            if resp_json.get("images") and isinstance(resp_json["images"], list):
+                img_url = resp_json["images"][0].get("url")
+            if not img_url and resp_json.get("data") and isinstance(resp_json["data"], list):
+                img_url = resp_json["data"][0].get("url")
+            if not img_url:
+                for v in resp_json.values():
+                    if isinstance(v, list):
+                        for item in v:
+                            if isinstance(item, dict) and item.get("url"):
+                                img_url = item.get("url")
+                                break
+                    if img_url:
+                        break
+
+        if not img_url:
+            raise ValueError("未能在响应中找到图片 URL，响应内容: " + str(resp_json))
+
+        return img_url
+
+    def _download_image(self, img_url: str) -> str:
+        os.makedirs(self.output_dir, exist_ok=True)
+        path = urlparse(img_url).path
+        unquoted_path = unquote(path)
+        filename = os.path.basename(unquoted_path)
+        if not filename:
+            filename = f"image_{int(time.time())}.png"
+
+        file_path = os.path.join(self.output_dir, filename)
+        r = requests.get(img_url, timeout=60)
+        r.raise_for_status()
+        with open(file_path, "wb") as f:
+            f.write(r.content)
+        return os.path.abspath(file_path)
+
+    def generate_and_save(
+        self,
+        prompt: str,
+        batch_size: int = 1,
+        image_size: str = "1024x1024",
+        num_inference_steps: int = 20,
+        guidance_scale: float = 7.5,
+    ) -> str:
+        """生成图片并保存第一张，返回本地绝对路径。该方法会受 IPM 限制控制。
+
+        可能抛出的异常：requests.HTTPError、ValueError 等。
+        """
+        # 等待可用的调用槽位（速率控制）
+        self._wait_for_slot()
+
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "model": self.model,
+            "prompt": prompt,
+            "image_size": image_size,
+            "batch_size": batch_size,
+            "num_inference_steps": num_inference_steps,
+            "guidance_scale": guidance_scale,
+        }
+
+        resp = requests.post(self.base_url, headers=headers, json=payload, timeout=self.timeout)
+        resp.raise_for_status()
+        resp_json = resp.json()
+
+        img_url = self._extract_first_image_url(resp_json)
+        return self._download_image(img_url)
+
+
+if __name__ == "__main__":
+    import os
+    from dotenv import load_dotenv
+
+    load_dotenv()
+
+    API_KEY = os.getenv("GUIJI_KEY")
+
+    gen = ImageGenerator(api_key=API_KEY, ipm=2, output_dir="output_images")
+
+    try:
+        # 示例：连续调用两次，IPM=2 会限制每分钟不超过 2 次
+        p1 = gen.generate_and_save(prompt="一幅美丽的风景画，画中有山脉和河流，采用吉卜力工作室的风格")
+        print("已保存图片到：", p1)
+        p2 = gen.generate_and_save(prompt="同一主题的另一幅构图，黄昏光线，柔和色彩")
+        print("已保存图片到：", p2)
+    except Exception as e:
+        print("保存图片失败：", e)
+```
+
+在图片和语音文件都有了之后，我们可以将图片和音频文件合成起来，其中每个图片占据大概多长的时间就看语音的长度了。
+比如我们有音频，就可以使用音频时长为主的合并方式，比如下面这个命令：
+
+```bash
+
+ffmpeg -y -loop 1 -i "bg.jpg" -i "audio.mp3" -vf "scale=1280:720,setsar=1" -c:v libx264 -preset medium -crf 23 -pix_fmt yuv420p -c:a aac -b:a 128k -shortest "out.mp4"
+```
+
+上面的命令意思是：
+ffmpeg
+调用 FFmpeg 程序（多媒体处理工具）。
+
+-y
+自动覆盖输出文件（若已存在则不提示，直接覆盖）。
+
+-loop 1
+对紧随其后的图片输入启用循环（1 表示循环，0 表示不循环）。用于把单张静态图片当作一条持续的视频流输入。
+
+-i "bg.jpg"
+第一个输入文件，背景图片（索引为 input 0）。配合 -loop 可无限生成视频帧。
+
+-i "audio.mp3"
+第二个输入文件，音频（索引为 input 1）。ffmpeg 会把音频和视频流合并到输出中（默认映射规则会选择合适的流）。
+
+-vf "scale=1280:720,setsar=1"
+视频滤镜（video filter）链：
+
+scale=1280:720：将视频（这里是循环的图片帧）缩放到 1280x720 分辨率。
+setsar=1：设置样本长宽比（Sample Aspect Ratio）为 1，保证像素为正方形，避免播放时拉伸。
+-c:v libx264
+指定视频编码器为 libx264（H.264 编码器），常用于兼容性与体积/质量折中。
+
+-preset medium
+x264 的 preset，控制编码速度与压缩效率的折中（常见值：ultrafast、superfast、veryfast、faster、fast、medium、slow……）。preset 越快质量/压缩率越低；越慢通常压缩更好但耗时更长。medium 是默认折中值。
+
+-crf 23
+CRF（Constant Rate Factor），x264 的质量参数（范围通常 0-51，越小质量越高/文件越大）。23 是常用默认值；想更高质量可用 18-20，想更小体积可以增大到 25+。
+
+-pix_fmt yuv420p
+指定像素格式为 yuv420p，确保生成的视频在大多数播放器和网页（尤其 H.264）上兼容播放（某些高色度格式可能不被某些播放器支持）。
+
+-c:a aac
+指定音频编码器为 AAC（常用的音频编码格式）。
+
+-b:a 128k
+音频比特率设置为 128 kb/s（音质/体积折中）。可根据需要改为 64k、192k 等。
+
+-shortest
+输出文件在最先结束的输入流结束时停止写入。常用于“图片循环 + 音频”场景：图片无限循环，但 -shortest 会让输出在音频播放结束时终止，从而使视频长度等于音频长度。
+
+"out.mp4"
+输出文件名（MP4 容器），包含编码后的视频与音频流。
+
+
+看到这里，我觉得你已经完全掌握了如何通过使用大模型自动化视频生成的完整流程！
+
+
+
+### 🔗 相关链接
+
+- **硅基流动API**：[获取免费API Key](https://cloud.siliconflow.cn/i/FcjKykMn)
+- **FFmpeg官网**：[下载与文档](https://ffmpeg.org/)
+- **项目源码**：欢迎 Star 和贡献代码
+
+### 📝 许可证
+
+本项目基于开源许可证发布，详见 `LICENSE` 文件。
+
