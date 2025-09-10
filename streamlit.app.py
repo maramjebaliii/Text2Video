@@ -4,16 +4,16 @@ import os
 import traceback
 from typing import Optional
 import streamlit as st
-from dotenv import load_dotenv
-
 from app.core.config import CONFIG, set_run_id
+from app.core.bootstrap import init_env_and_providers
 from app.core.pipeline import build_blocks_from_markdown
 from app.core.script_generate import generate_markdown_script
 from app.core.video import assemble_video_from_blocks
 from app.core.provider_factory import create_providers
 
 
-load_dotenv()
+# 初始化环境与 provider（会加载 .env / config.yaml 并注入 provider 工厂默认）
+init_env_and_providers()
 
 # 固定 Web UI 的输出目录，避免每次随机 run_id 导致路径变化
 try:

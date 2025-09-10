@@ -17,16 +17,12 @@ from typing import Any, Dict
 # 尝试读取项目根的 config.yaml（若存在），优先覆盖环境变量
 _ROOT = Path(__file__).resolve().parent.parent.parent
 _CONFIG_YAML_PATH = _ROOT / "config.yaml"
-_yaml_config: Dict[str, Any] = {}
-try:
-    import yaml
+import yaml
 
-    if _CONFIG_YAML_PATH.exists():
-        with _CONFIG_YAML_PATH.open("r", encoding="utf-8") as f:
-            _yaml_config = yaml.safe_load(f) or {}
-except Exception:
-    # 如果没有安装 PyYAML 或解析失败，保持 _yaml_config 为空，后续会回退到环境变量
-    _yaml_config = {}
+_yaml_config: Dict[str, Any] = {}
+if _CONFIG_YAML_PATH.exists():
+    with _CONFIG_YAML_PATH.open("r", encoding="utf-8") as f:
+        _yaml_config = yaml.safe_load(f) or {}
 
 
 @dataclass(slots=True)
@@ -61,14 +57,18 @@ class VideoConfig:
     """视频相关配置。"""
     width: int = int(_yaml_config.get("VIDEO_WIDTH") or os.getenv("VIDEO_WIDTH", "1280"))
     height: int = int(_yaml_config.get("VIDEO_HEIGHT") or os.getenv("VIDEO_HEIGHT", "720"))
-    debug: bool = (_yaml_config.get("VIDEO_DEBUG") == True) or (os.getenv("VIDEO_DEBUG", "0") == "1")
+    # 优先使用 config.yaml 中的布尔值（如果存在且为 bool），否则保留原有 env 比较逻辑 ("1" 表示 True)
+    _vd = _yaml_config.get("VIDEO_DEBUG")
+    debug: bool = _vd if isinstance(_vd, bool) else (os.getenv("VIDEO_DEBUG", "0") == "1")
     font_path: str | None = _yaml_config.get("VIDEO_FONT_PATH") or os.getenv("VIDEO_FONT_PATH") or None
     # 默认只给文件名，实际落盘位置在拼装器中与 PathConfig.output_dir 组合
     output_file: Path = Path(os.getenv("VIDEO_OUTPUT", "final_video.mp4"))
     # ffmpeg 日志控制
     ffmpeg_log_level: str = os.getenv("FFMPEG_LOGLEVEL", "error")  # quiet|panic|fatal|error|warning|info|verbose|debug
-    ffmpeg_hide_banner: bool = os.getenv("FFMPEG_HIDE_BANNER", "1") == "1"
-    ffmpeg_no_stats: bool = os.getenv("FFMPEG_NOSTATS", "1") == "1"
+    _fh = _yaml_config.get("FFMPEG_HIDE_BANNER")
+    ffmpeg_hide_banner: bool = _fh if isinstance(_fh, bool) else (os.getenv("FFMPEG_HIDE_BANNER", "1") == "1")
+    _fn = _yaml_config.get("FFMPEG_NOSTATS")
+    ffmpeg_no_stats: bool = _fn if isinstance(_fn, bool) else (os.getenv("FFMPEG_NOSTATS", "1") == "1")
 
 
 @dataclass(slots=True)

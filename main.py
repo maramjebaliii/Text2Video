@@ -2,35 +2,10 @@
 from __future__ import annotations
 
 from fastapi import FastAPI
-from dotenv import load_dotenv
+from app.core.bootstrap import init_env_and_providers
 
-# 先加载 .env，供路由中的 Provider 工厂读取
-load_dotenv()
-
-from app.core.provider_factory import configure_providers
-import os
-from pathlib import Path
-
-# 优先尝试从根目录的 config.yaml 读取 provider 配置，如果不可用则回退到环境变量
-_root = Path(__file__).resolve().parent.parent
-_cfg_api_key = None
-_cfg_base = None
-try:
-	import yaml
-
-	cfg_path = _root / "config.yaml"
-	if cfg_path.exists():
-		with cfg_path.open("r", encoding="utf-8") as f:
-			data = yaml.safe_load(f) or {}
-			_cfg_api_key = data.get("GUIJI_API_KEY")
-			_cfg_base = data.get("GUIJI_BASE_URL") or data.get("GUIJI_BASE_URL")
-except Exception:
-	# 无 PyYAML 或解析异常时，保持为 None 并回退到环境变量
-	_cfg_api_key = None
-	_cfg_base = None
-
-# 最终注入（优先使用 yaml 中的值）
-configure_providers(api_key=_cfg_api_key or os.getenv("GUIJI_API_KEY"), base_url=_cfg_base or os.getenv("GUIJI_BASE_URL"))
+# 初始化环境与 provider（会加载 .env / config.yaml 并注入 provider 工厂默认）
+init_env_and_providers()
 
 # 创建应用
 app = FastAPI(title="Text2Video API", version="0.1.0")
