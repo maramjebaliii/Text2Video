@@ -1,3 +1,7 @@
+# Use Baidu PyPI mirror by default to speed up installs in China
+--index-url https://mirror.baidu.com/pypi/simple/
+--trusted-host mirror.baidu.com
+
 # Generated from pyproject.toml dependencies
 Pillow>=9.0.0
 ffmpeg-python>=0.2.0
