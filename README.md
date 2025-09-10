@@ -153,9 +153,61 @@ uv run python main.py
 
 ## ⚙️ 配置设置
 
+### 配置来源与优先级
+
+本项目支持两类配置来源（从高到低优先级）：
+
+1. `config.yaml`（如果存在则优先使用；适合本地开发或容器挂载统一配置）
+2. 环境变量（包括 `.env` 中的变量）
+3. 代码内置默认值（兜底，不推荐依赖）
+
+也就是说：`config.yaml` 中的同名键会覆盖环境变量；未出现在 `config.yaml` 的键再回退到环境变量 / `.env`；仍缺失才使用默认值。
+
+仓库提供模板文件：`config.example.yaml` 与 `.env.example`。请复制后填写真实值：
+
+```bash
+cp config.example.yaml config.yaml
+cp .env.example .env
+```
+
+> 建议：`config.yaml` 与 `.env` 不要提交包含真实秘钥的版本；生产环境更倾向仅用环境变量（例如 CI/CD 注入）。
+
+一个典型的 `config.yaml` 示例：
+
+```yaml
+GUIJI_API_KEY: "sk-xxxx"
+GUIJI_BASE_URL: "https://api.siliconflow.cn/v1"
+GUIJI_IMAGE_BASE_URL: "https://api.siliconflow.cn/v1/images/generations"
+GUIJI_IMAGE_MODEL: "Kwai-Kolors/Kolors"
+GUIJI_CHAT_MODEL: "Qwen/Qwen2.5-32B-Instruct"
+IMAGE_IPM: 2              # 每分钟图片生成速率限制
+VIDEO_WIDTH: 1280          # (可选) 覆盖默认视频宽度
+VIDEO_HEIGHT: 720          # (可选) 覆盖默认视频高度
+VIDEO_DEBUG: false         # (可选) 生成调试级日志/中间帧
+```
+
+如果同时在 `.env` 写了 `GUIJI_IMAGE_MODEL=OtherModel`，但 `config.yaml` 中已有该键，最终仍以 `config.yaml` 的值为准。
+
+快速验证优先级（应打印出 `config.yaml` 中的值）：
+
+```cmd
+python - <<"PY"
+from app.core.config import CONFIG
+print("chat_model:", CONFIG.model.chat_model)
+print("image_model:", CONFIG.model.image_model)
+print("run_id:", CONFIG.path.run_id)
+PY
+```
+
 ### 创建配置文件
 
-在项目根目录创建 `.env` 文件，配置必需的 API 密钥和服务参数。
+最少需要提供 API Key。你可以：
+
+- 只写在 `config.yaml`（推荐本地调试）
+- 或只写在 `.env`（推荐生产 / 容器通过环境注入）
+- 或两者都写（`config.yaml` 优先生效）
+
+下面仍以 `.env` 形式给出示例（与 `config.yaml` 键名一致，可互换）：
 
 #### 获取硅基流动 API Key
 
@@ -165,7 +217,7 @@ uv run python main.py
 2. 在控制台创建 API Key
 3. 将 API Key 配置到 `.env` 文件中
 
-#### 配置文件示例
+#### `.env` 配置文件示例
 
 ```ini
 # ===========================================
@@ -191,7 +243,7 @@ GUIJI_TTS_MODEL=FunAudioLLM/CosyVoice2-0.5B
 
 ### 配置验证
 
-创建配置文件后，可以通过以下方式验证配置是否正确：
+创建或修改 `config.yaml` / `.env` 后，可以通过以下方式验证加载是否成功：
 
 ```cmd
 # 测试 API 连接
@@ -345,10 +397,48 @@ docker compose logs -f
 
 ### Docker 部署注意事项
 
-**环境变量配置**：
+**配置挂载策略**：
 
-- 确保 `.env` 文件包含完整的 `GUIJI_API_KEY` 配置
-- Docker Compose 会自动将 `.env` 文件挂载到容器内
+- 你可以选择：
+    - 仅传递环境变量（`--env-file .env` 或 Compose 的 `env_file`）
+    - 挂载一个 `config.yaml`（覆盖内部同名值）
+    - 两者并存：当需要在同一镜像下给不同实例提供差异化配置时，可用不同 `config.yaml`。
+
+示例（仅使用 `.env` 环境变量）：
+
+```cmd
+docker run --rm -it ^
+    -p 8000:8000 ^
+    -e RUN_MODE=api ^
+    --env-file .env ^
+    -v "%CD%\output":/app/output ^
+    text2video
+```
+
+示例（仅挂载本地 `config.yaml`）：
+
+```cmd
+docker run --rm -it ^
+    -p 8000:8000 ^
+    -e RUN_MODE=api ^
+    -v "%CD%\config.yaml":/app/config.yaml ^
+    -v "%CD%\output":/app/output ^
+    text2video
+```
+
+示例（挂载本地 `config.yaml` + `.env`）：
+
+```cmd
+docker run --rm -it \
+    -p 8000:8000 \
+    -e RUN_MODE=api \
+    --env-file .env \
+    -v "%CD%\config.yaml":/app/config.yaml \
+    -v "%CD%\output":/app/output \
+    text2video
+```
+
+> 注意：容器内若存在 `/app/config.yaml`，它将覆盖 `.env` 中的同名变量。
 
 
 
