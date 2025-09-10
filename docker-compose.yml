@@ -12,7 +12,10 @@ services:
       - "8000:8000"
     volumes:
       - ./output:/app/output
-      - ./.env:/app/.env:ro
+      # Optional: mount config.yaml if you use repository-local configuration
+      - ./config.yaml:/app/config.yaml:ro
+    env_file:
+      - .env
   ui:
     image: text2video:latest
     environment:
@@ -23,4 +26,6 @@ services:
       - "8501:8501"
     volumes:
       - ./output:/app/output
-      - ./.env:/app/.env:ro
+      - ./config.yaml:/app/config.yaml:ro
+    env_file:
+      - .env

@@ -40,6 +40,9 @@ RUN mkdir -p /app/output
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+# Note: you can mount a local config.yaml or .env into /app to override container config
+# Example docker-compose mounts in repository: ./config.yaml:/app/config.yaml:ro and env_file: .env
+
 EXPOSE 8000 8501
 
 # api | ui
