@@ -10,7 +10,7 @@ import os
 from app.core.config import CONFIG
 from app.providers import (
     GuijiTTSProvider,
-    AliyunTTSProvider,
+    # AliyunTTSProvider,
     SiliconFlowImageProvider,
     SiliconFlowLLMProvider,
 )
